@@ -57,5 +57,115 @@ handle events. Several built-in classes in Node derive from EventEmitter.
  To create a class with the ability to raise events, we should extend EventEmitter:
 ```class Logger extends EventEmitter {} ```
 
+### Modules In NodeJS:- 
+Node has a few built-in modules that enable us to work with the file system, path objects, network, operating system, etc.
+
+#### Path Module:-
+```
+const path  = require('path');
+var pathObj = path.parse('__filename')
+console.log(pathObj);
+O/P => { root: '', dir: '', base: '__filename', ext: '', name: '__filename' }
+```
+
+#### OS Module:-
+```
+const os= require('os');
+console.log('Total memory is '+ os.totalmem());
+console.log(`Free memory : ${os.freemem}`);
+```
+
+#### File System Module:-
+```
+const fs = require('fs');
+
+// It gives all the files in the current folder but as synchronous
+const files = fs.readdirSync('./')
+console.log(files);
+
+// It gives all the files in the current folder but as Asynchronous through callbacks
+const files = fs.readdir('./', function(err, files){
+    if(err) console.log('Error',err)
+    else console.log('Result',files)
+});
+
+O/P:- Result [ 'app.js', 'logger.js' ]
+```
+
+#### Event Module:-
+```
+const EventEmitter = require('events');
+const emitter = new EventEmitter();
+
+// Register listener
+//emitter.on('MessageLogged',function(){  // Listen without data
+emitter.on('MessageLogged',function(args){
+console.log('Listener is listening',args);
+});
+
+// Raised an event
+//emitter.emit('MessageLogged'); // Emit without data
+emitter.emit('MessageLogged',{id : 1,url:'http'});
+```
+
+#### Arrow function
+```
+// Arrow function in ECMA 6
+emitter.on('MessageLogged',(args) => {
+    console.log('Listener is listening',args);
+});
+```
+
+* You can create a class in a module and export it and get it in another module to send and receive events.
+
+From Module
+```
+const EventEmitter = require('events');
+class Logger extends EventEmitter{
+    log(message){
+        console.log(message);
+
+        // Raise and events
+        this.emit('MessageLogged',{id : 1,url:'http'});
+    }
+}
+
+module.exports = Logger; 
+```
+
+To Module
+```
+const Logger = require('./logger');
+const loggerObj = new Logger();
+loggerObj.on('MessageLogged', (args) => {
+console.log('Listener is listeningin app which is sent from logger module',args);
+});
+
+loggerObj.log("Message from app");
+```
+
+#### HTTP Module:-
+```
+const http = require('http');
+const server  = http.createServer();
+server.on('connection',(socket) => {
+    console.log('New connectione established')
+});
+server.listen(3000);
+console.log('Listening on port 3000..')
+
+const server  = http.createServer((req, res) => {
+    if(req.url === '/'){
+        res.write('Hello response');
+        res.end;
+    }
+    if(req.url === '/api/course'){
+        res.write(JSON.stringify([1,2,2,4]));
+        res.end;
+    }
+});
+server.listen(3000);
+console.log('Listening on port 3000..')
+```
 
 
