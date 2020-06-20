@@ -167,5 +167,159 @@ const server  = http.createServer((req, res) => {
 server.listen(3000);
 console.log('Listening on port 3000..')
 ```
+### Node Package Manager (npm)
 
+* Every Node application has a package.json file that includes metadata about the
+application. This includes the name of the application, its version, dependencies,
+etc.
+* We use NPM to download and install 3rd-party packages from NPM registry:
+* All the installed packages and their dependencies are stored under
+`node_modules` folders. This folder should be excluded from the source control.
+* Node packages follow semantic versioning: major.minor.patch
+* To check npm installed and its version  
+``` $npm -v ```
+* When you install node then npm comes along with it and both versions could be different.
+* If you want to install a specific version of npm you can do like this
+```
+$sudo npm i -g npm@<required_version>
+$sudo npm i -g npm@5.5.1
+```
+* Before adding to any Node package we have to add the package.json is a must. Package.json includes the basic details of your project/app like dependencies.
+To create package.json type 
+```
+$npm init  //it will ask many questions like below..
+```
+package name: (npm-demo) 
+version: (1.0.0) 
+description: 
+entry point: (index.js) 
+test command: 
+git repository: 
+keywords: 
+author: 
+license: (ISC)
+just keep pressing Enter.
+There is faster way to create package.json type 
+```
+$npm init --yes
+```
+* To use the third party package like underscore. First install it then use it.
+Description given here https://www.npmjs.com/package/underscore
+```
+npm i underscore // to install the package.
+```
+
+After doing this in our package.json a new entry will get created like this..
+```
+"dependencies": {
+   "underscore": "^1.10.2"
+ }
+```
+We can use it like this..
+```
+var _ = require('underscore');
+var result= _.contains([1,2,4],4);
+console.log(result);
+O/P :- ture
+```
+
+*  Install mongoose - `npm i mongoose`
+
+If you install mongoose it comes to lots of other dependencies packages which also comes parallel to the mongoose package under node_modules. If a case of some package already installed with a different version (just supposed v1.0.0) then the new package with the same name (just supposed v12.0.0)  goes inside to that new package not parallel.
+⇒ In case of node_modules gets deleted and your apps package.json has some dependencies, to install all the required dependencies just type `$npm i `
+
+Or another case if you are trying to transfer your project to someone else then you don't need to give heavy node_modules folder, so just give your file and ask to hit  `$npm i `
+
+It will install all the required dependencies mentioned in the package.json
+* Let's suppose we don’t want to push node_modules to git, we want to ignore it then we need to create .gitignore file and just write node_modules/ inside the .gitignore file and save it it will not get committed and pushed to git.
+* Semantic Versioning:- It has 3 parts. Example:- "mongoose": "^5.9.10"
+^ -> Any version as long as the major verison is 5. New patches available then use that. 
+ 5 -> Major - for major changes, 9 -> Minor - for New features, 10 -> for bugs fixes and patch
+To get the exact version remove the ^
+E.g:- ^5.9.10 is same as 5.x
+
+* Listing the installed packages:- It is very difficult to go and check each package to get their verison.  We can get a list by typing 
+```
+$npm list  // it will give you a detailed tree with dependencies. It will be all dependencies to each other. 
+```
+
+─┬ mongoose@5.9.19
+│ ├── bson@1.1.4
+│ ├── kareem@2.3.1
+│ ├─┬ mongodb@3.5.9
+│ │ ├─┬ bl@2.2.0
+│ │ │ ├─┬ readable-stream@2.3.7
+.
+.
+.
+│ ├── sift@7.0.1
+│ └── sliced@1.0.1
+└── underscore@1.10.2
+
+But if you want to know only your top level dependency then type  
+```
+$ npm list --depth=0
+```
+├── mongoose@5.9.19
+└── underscore@1.10.2
+
+
+### Viewing Registry info for a package:-
+```
+$npm view mongoose  	// Gives everything about mongoose package
+$npm view mongoose dependencies // Gives all the dependencies of mongoose
+$npm view  mongoose versions  	// Gives all the versions released by mongoose till date.
+```
+
+### Installing a specific version of a package:-
+```
+$npm i mongoose@2.4.2 	// Specifically 2.4.2 version of mongoose will be installed.
+$npm outdated			// Tell what are lasted, current, wanted, location
+```
+And if you run `$npm outdated` if you see list of packages with versions and you want to update those then you can run $npm update	
+
+If you want to update any package to Latest release the type
+```
+$sudo npm i -g npm-check-updates
+$npm-check-updates
+$ncu -u
+$npm i
+```
+
+### DevDependencies (Development Dependencies):- 
+There are some dependency needs which need for unit testing, code structure etc supporting dependencies which should not go to production, we can install it like this. Installing jshint. It will install and can be seen in the package.json file. It appears on the node_modules folder as dependency.
+```
+$npm i jshint --save-dev
+```
+After successful installation a separate object is created in package.json as devDependencies
+```
+"devDependencies": {
+    "jshint": "^2.11.1"
+  }
+```
+
+
+### Uninstalling a package:- 
+```
+$npm uninstall mongoose or $npm un mongoose
+```
+It will be removed from package.json and node_module as well.
+
+⇒ Global Package:- npm, ng, you can run it from anywhere from any folder.
+To install npm as a global 
+```$npm i -g npm // Install the latest version of npm Globally. ```
+If you want to check all the global outdated package you can run ```$npm -g outdated```
+If you want to uninstall the global package ```$npm un -g <packagename>```
+
+### Publishing a package:- 
+To publish a package to npm we need to have an account. We can create, login like this..
+```
+$npm adduser
+$npm login 		// Give username, password and email, then type
+$npm publish
+Once published we can install it using $npm i <packagename_published> and use it using require().
+If you have done some changes and want to update the publish then type
+$npm version major/minor/patch  // According to your changes
+$npm publish
+```
 
