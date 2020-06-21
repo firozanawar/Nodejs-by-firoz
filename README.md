@@ -1,7 +1,7 @@
 # Node.js
 
 ### Introduction:-
-Creator of Node is Ryan Dahl . Node.js is a JavaScript runtime built on Chrome's V8 JavaScript engine. Node JS is a runtime environment for executing JavaScript code.  It is used for Backend Services like API (Application Programming Interface). It is used to build Highly scalable, data intensive and real time apps. Node is something which can be run outside of Browser using Chrome’s V8 engine. NodeJS is used where capability is not available in browsers like FileSystem or network etc. Node is not a programming language or framework, it is a runtime environment for executing JavaScript code.
+Creator of Node is Ryan Dahl . Node.js is a JavaScript runtime environment built on Chrome's V8 JavaScript engine. Node JS is a runtime environment for executing JavaScript code outside browser.  It is used for Backend Services like API (Application Programming Interface). It is used to build highly scalable, data intensive and real time apps. Node is something which can be run outside of Browser using Chrome’s V8 engine. NodeJS is used where capability is not available in browsers like FileSystem or network etc. Node is not a programming language or framework, it is a runtime environment for executing JavaScript code.
 * Node is Non-Blocking Asynchronous.
 Node applications are single-threaded. That means a single thread is used to
 serve all clients.
@@ -18,14 +18,24 @@ system, etc.
 
 ![NodeApp2](https://user-images.githubusercontent.com/15997473/85196485-2627d680-b2f8-11ea-97fe-fd06a90b0a87.png)
 
+### Node Architecture:-
+
+JavaScript engines in different browsers
+
 ![NodeApp3](https://user-images.githubusercontent.com/15997473/85196487-2922c700-b2f8-11ea-82ec-b706ef91b0c4.png)
 
 ### Miscellaneous:-
-* To check Node is installed in your computer type in terminal $node --version
-* To run a Node JS code. Just run $node app.js
+* To check Node is installed in your computer type in terminal 
+```
+$node --version
+```
+* To run a Node JS code. Just run 
+```
+$node app.js
+```
 * Global Scope object in Javascript
 ```
-	Console.log, setTimeout(), clearTimeout(), setInterval, clearInterval(), window etc
+Console.log, setTimeout(), clearTimeout(), setInterval, clearInterval(), window etc
 ```
 * In javascript we can call everything using the window. Like `window.console.log` but since there is no window in Node, there is something called global. We can use global here to access anything like..
 `global.console.log, global.setTimeout...`
@@ -36,9 +46,11 @@ To know the current module just type `console.log(module)`
 And another module can get it using require like this
 `Const logger = require(./logger.js)`
 But using the above we are creating a whole object to access it, if we have only one function to export then no need to export a full object just do like this.
-`Module.exports  = <export-items>`
-`Const log = require(./logger.js)  // here now log is just the function not object.`
-`log(‘message’);`
+```
+Module.exports  = <export-items>
+Const log = require(./logger.js)  // here now log is just the function not object.
+log(‘message’);
+```
 * Tools like `jshint` can be used to track the errors in code in compile time.
 * Node does not run out code directly, it wraps in a function. This is called Module Wrapper Function. It wraps out code like this
 ```
@@ -57,7 +69,7 @@ handle events. Several built-in classes in Node derive from EventEmitter.
  To create a class with the ability to raise events, we should extend EventEmitter:
 ```class Logger extends EventEmitter {} ```
 
-### Modules In NodeJS:- 
+## Modules In NodeJS:- 
 Node has a few built-in modules that enable us to work with the file system, path objects, network, operating system, etc.
 
 #### Path Module:-
@@ -167,15 +179,15 @@ const server  = http.createServer((req, res) => {
 server.listen(3000);
 console.log('Listening on port 3000..')
 ```
-### Node Package Manager (npm)
+## Node Package Manager (npm)
 
-* Every Node application has a package.json file that includes metadata about the
+* Every Node application has a `package.json` file that includes metadata about the
 application. This includes the name of the application, its version, dependencies,
 etc.
 * We use NPM to download and install 3rd-party packages from NPM registry:
 * All the installed packages and their dependencies are stored under
 `node_modules` folders. This folder should be excluded from the source control.
-* Node packages follow semantic versioning: major.minor.patch
+* Node packages follow semantic versioning: `major.minor.patch`
 * To check npm installed and its version  
 ``` $npm -v ```
 * When you install node then npm comes along with it and both versions could be different.
@@ -190,23 +202,34 @@ To create package.json type
 $npm init  //it will ask many questions like below..
 ```
 package name: (npm-demo) 
+
 version: (1.0.0) 
+
 description: 
-entry point: (index.js) 
+
+entry point: (index.js)
+
 test command: 
+
 git repository: 
+
 keywords: 
+
 author: 
+
 license: (ISC)
-just keep pressing Enter.
+
+just keep pressing Enter....
+
 There is faster way to create package.json type 
 ```
 $npm init --yes
 ```
+#### Adding a new package/dependency to nodejs project.
 * To use the third party package like underscore. First install it then use it.
 Description given here https://www.npmjs.com/package/underscore
 ```
-npm i underscore // to install the package.
+$npm i underscore // to install the package.
 ```
 
 After doing this in our package.json a new entry will get created like this..
@@ -223,7 +246,10 @@ console.log(result);
 O/P :- ture
 ```
 
-*  Install mongoose - `npm i mongoose`
+*  If you want to install mongoose, you can do like this - 
+```
+$npm i mongoose
+```
 
 If you install mongoose it comes to lots of other dependencies packages which also comes parallel to the mongoose package under node_modules. If a case of some package already installed with a different version (just supposed v1.0.0) then the new package with the same name (just supposed v12.0.0)  goes inside to that new package not parallel.
 ⇒ In case of node_modules gets deleted and your apps package.json has some dependencies, to install all the required dependencies just type `$npm i `
@@ -261,12 +287,13 @@ But if you want to know only your top level dependency then type
 $ npm list --depth=0
 ```
 ├── mongoose@5.9.19
+
 └── underscore@1.10.2
 
 
 ### Viewing Registry info for a package:-
 ```
-$npm view mongoose  	// Gives everything about mongoose package
+$npm view mongoose  		// Gives everything about mongoose package
 $npm view mongoose dependencies // Gives all the dependencies of mongoose
 $npm view  mongoose versions  	// Gives all the versions released by mongoose till date.
 ```
@@ -307,9 +334,17 @@ It will be removed from package.json and node_module as well.
 
 ⇒ Global Package:- npm, ng, you can run it from anywhere from any folder.
 To install npm as a global 
-```$npm i -g npm // Install the latest version of npm Globally. ```
-If you want to check all the global outdated package you can run ```$npm -g outdated```
-If you want to uninstall the global package ```$npm un -g <packagename>```
+```
+$npm i -g npm // Install the latest version of npm Globally. 
+```
+If you want to check all the global outdated package you can run 
+```
+$npm -g outdated
+```
+If you want to uninstall the global package 
+```
+$npm un -g <packagename>
+```
 
 ### Publishing a package:- 
 To publish a package to npm we need to have an account. We can create, login like this..
