@@ -322,4 +322,169 @@ If you have done some changes and want to update the publish then type
 $npm version major/minor/patch  // According to your changes
 $npm publish
 ```
+## Express
 
+Express is the fast and lightweight framework for building web applications.
+
+* RESTful APIs:- REST -> Representational State Transfer.
+* Clients communicate to the Server using HTTP protocol where RESTful services are available to respond.
+
+### Sending and receiving basic GET request:-
+```
+var express = require('express');
+var app = express();
+
+app.get('/',(req,res) => {
+    res.send('Hello Word')
+});
+app.get('/api/courses',(req,res) => {
+    res.send([1,2,3,4])
+});
+app.listen(3000, () => console.log('Listening to post 3000'));
+O/P:- Check on chrome browser by http://localhost:3000/ or http://localhost:3000/api/courses
+[1,2,3,4,]
+```
+
+### Installing Nodemon (Node monitor):- 
+Let us suppose we are creating an api request in index.js and saving it and then going to the terminal and typing $node index.js again and again for changes. Nodemon packages can help with the same. After installing nodemon just run the index.js using $nodemon index.js once and whenever you do any changes and save it will automatically run.
+* We use Nodemon to watch for changes in files and automatically restart the
+node process.
+* We can use environment variables to store various settings for an application. To
+read an environment variable, we use process.env.
+* You should never trust data sent by the client. Always validate! Use Joi package
+to perform input validation.
+
+* Environment variable:- hardcoded 3000 is not a safe idea, we need to get the port from process using process.env.PORT if it is not available use the default one like 3000. In case you want to set the POST use command `$export POST=5000` then run `nodemon index.js`
+```
+const port = process.env.PORT || 3000;
+app.listen(3000, () => console.log(`Listening to post ${port}...`));
+```
+
+### Route Parametres:- 
+apis routing to different different request.like 
+api/post/2020/10 // Here 2020 is year and 10 is the month.
+
+```
+app.get('/api/posts/:year/:month',(req,res) => {
+    //res.send(req.params) // Route parameter
+    res.send(req.query)    // Query parameter
+    });
+
+Hit below url on browser or postman to get the output
+http://localhost:3000/api/posts/2020/10
+http://localhost:3000/api/posts/2020/10?sortBy=name
+```
+
+### Handling HTTP GET request:- 
+Create and array and based on query passed in URL return the result.
+```
+const courses = [
+    {id: 1 , name : 'course1'},
+    {id: 2 , name : 'course2'},
+    {id: 3 , name : 'course3'}
+];
+
+app.get('/api/courses/:id',(req,res) => {
+  // res.send(courses); // Return all the courses.
+    const course = courses.find(c => c.id === parseInt(req.params.id));
+
+    if(!course) res.status(404).send('The course given id was not found')
+    res.send(course);
+});
+http://localhost:3000/api/courses/1
+O/P:- {
+id: 1,
+name: "course1",
+}
+```
+
+### Handling HTTP Post request:-
+If you are trying to deal with post method request body and trying to read something from body then add this on top - to handle JSON pipelines in requests
+```
+app.use(express.json())
+
+app.post('/api/courses', (req,res) => {
+
+    const newcourse = {
+        id : courses.length + 1,
+        name : req.body.name
+    }
+    courses.push(newcourse);
+    res.send(newcourse);
+});
+```
+It gets the “name” from the body response and adds it to our course array and returns the new added object back as a response.
+
+#### Input Validation:-
+```
+if(!req.body.name || req.body.name.length < 3){
+        res.status(400).send('Name is required and with 3 char minium');
+        return;
+    }
+
+Instead we validate input manually there is a package called joi. To install it $npm i joi
+var Joi = require('joi');
+
+const schema = {
+        name : Joi.string().min(3).required()
+    };
+
+    const result = Joi.validate(req.body, schema);
+    if(result.error){
+        res.status(400).send(result.error.details[0].message);
+        return;
+    }
+```
+
+### Handling HTTP PUT request:-
+```
+app.put('/api/courses/:id',(req,res) => {
+
+    // Look for course
+    // if not found return 404
+    const course = courses.find(c => c.id === parseInt(req.params.id));
+    if(!course) res.status(404).send('The course given id was not found')
+
+
+    // If found validate
+    // if invalid
+    //consta result = validateCourse(req.body);
+    const {error} = validateCourse(req.body);  // result.error
+
+    // Object destruction feature in JS  
+    if(error){
+        res.status(400).send(result.error.details[0].message);
+        return;
+    }
+
+    // Update course
+    // Return the updated course to the client.
+    course.name = req.body.name;
+    res.send(course)
+
+});
+
+function validateCourse(course){
+    const schema = {
+        name : Joi.string().min(3).required()
+    };
+
+    return Joi.validate(course, schema);
+}
+```
+### HTTP Delete request:-
+```
+app.delete('/api/courses/:id',(req,res) => {
+    // Look up the course
+    // Not existed 4040
+    const course = courses.find(c => c.id === parseInt(req.params.id));
+    if(!course) return res.status(404).send('The course given id was not found')
+
+    // Delete
+    const index = courses.indexOf(course);
+    courses.splice(index,1);
+
+    //Return the deleted.
+    res.send(course);
+});
+```
