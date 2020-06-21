@@ -523,3 +523,193 @@ app.delete('/api/courses/:id',(req,res) => {
     res.send(course);
 });
 ```
+
+## Express Advance:-
+
+### Middleware and custom Middleware:- 
+
+A middleware function is a function that takes a request object and either
+terminates the request/response cycle or passes control to another middleware
+function.
+
+Express has a few built-in middleware functions:
+- json(): to parse the body of requests with a JSON payload
+- urlencoded(): to parse the body of requests with URL-encoded payload
+- static(): to serve static files
+- You can create custom middleware for cross-cutting concerns, such as logging,
+authentication, etc.
+
+E.g: `app.use(express.json())` is middleware:- The job of the middleware function is to read the request and if there is any json object in the body of the request, it will parse the body of the request into a json object and then it will set `req.body` property.
+
+The use of middleware to make a pipeline between the request and response. Let suppose after `app.use(express.json())` you want to do some logging then create a custom middleware for this job.
+
+* Middleware functions are called in sequence.
+* We can create a custom middleware in a separate file and use it in our file like below..
+```
+Logger.js
+function log(req,res,next)  {
+    console.log("Logging...");  // req.body
+    next();
+}
+
+module.export = log;
+```
+```
+Index.js
+app.use(express.json())
+
+// Custom middleware
+app.use(logger);
+
+// Custom middleware
+app.use(function(req,res,next)  {
+    console.log("Authenticating...");
+    next();
+});
+
+
+O/P:- 
+Logging...
+Authenticating...
+```
+
+### Built-In Middleware:- 
+```app.use(express.json())    → // set the req.body if json object is found in request body```
+
+// url encoded format for POST req
+```app.use(express.urlencoded({ extended: true})) // key=value&key=value   // req.body if json object ```
+
+// static content can be served using this..
+// Create a folder public and inside create a file readme.txt and put some content. If we hit http://localhost:3000/readme.txt on browser the content of the file will be shown on browser.
+```app.use(express.static('public'))```
+
+### Third-part Middleware:-
+http://expressjs.com/en/resources/middleware.html
+Middleware functions impact the application so use it carefully. It slows down the request processing. 
+
+Some of the useful third party middleware is below..
+https://github.com/helmetjs/helmet
+http://expressjs.com/en/resources/middleware/morgan.html : - This makes debugging easier like if we use morgan we can see on the terminal what was requested, request type, status code, time taken to respond..
+`GET /api/course    200 79 - 2.806 ms (morgan’s tiny format)`
+
+### Environment:-
+Sometimes we want to know that we are in development or production and based on the environment we use certain functionality to enable and disable it.
+```
+// Know your environment
+console.log(`NODE_ENV: ${process.env.NODE_ENV}`);  // If not set it will give you undefined
+console.log(`app ENV: ${app.get('env')}`);   // If not set it will give you development
+
+if(app.get('env') === 'development'){
+    // Enable features here like logging etc etc..
+    console.log(‘inside development');
+}
+```
+
+You can set environment variable on Mac using ``` $export NODE_ENV  = production```
+
+### Configuration:-
+Storing configuration settings for the application and overriding those settings in each environment. Most populer is 
+https://www.npmjs.com/package/rc
+https://www.npmjs.com/package/config
+
+You should not use app secret things like password or database key here in config file. Instead we should keep in the environment variables and read them using the config module. 
+To create a config module install it using 
+```npm i config 
+const config = require('config');
+```
+Then create a config folder and inside it create a various configuration json file like default.json, development.json and production.json etc.. and use it in code like this
+```
+console.log('Application name: '+config.get('name')); // it will search for name key in json
+console.log('Mail Server name: '+config.get('mail.host')); // it will search for host  key  in mail object in json
+```
+For secret use the the environment variable to set the password like this 
+```$export app_password=1234```
+And create a file under config folder with same name like this “custom-environment-variables.json” and define your json over there like this 
+```
+{
+    "name" : "My express app development",
+    "mail" : {
+        "password" : "app_password"
+    }
+}
+```
+Use it in code as below..
+```console.log('Mail Server name: '+config.get('mail.password')); // It checks for various config file for mail.password and get the value```
+
+### Debugging:-
+For extensive debugging use “debug”package by installing ```$npm I debug```
+Add the debug module and Config the debug with tag as below..
+```
+const startupDebugger = require('debug')('app:startup');
+const dbDebugger = require('debug')('app:db');
+To use it :-
+if(app.get('env') === 'development'){
+    startupDebugger('Debugger enabled');
+}
+
+dbDebugger('connecting to db');
+To enable it, use the export option to do it..
+$export DEBUG=app:startup // for app:startup logs only
+$ export DEBUG= // To reset the above step
+$ export DEBUG=app:startup,app:db. // for multiple logs
+$ export DEBUG=app:* // for all logs
+
+We can set the debug flag while starting our app like this
+$ DEBUG=app:db nodemon index.js 
+```
+
+### Templating Engine:-
+A json response is required to return to the client, sometimes a html markup so here the Templating Engine is required. Some of the popular ones are “Pug”, “Mustache” or “EJS”. 
+/****** Templating engine ******/
+// Loading a pug templating engine
+```
+app.set('view engine','pug');
+app.set('views','./views'); // default
+```
+
+Create a folder in the root directory as a “views” and inside it create a file “index.pug” and add the following in it..
+```
+html
+    head
+        title= title
+    body
+        h1=message
+ ```
+// Send the html markup back as a response, here index is index.pug and title and message from above variable..
+```
+app.get('/', (req,res) => {
+    res.render('index',{title:'my title',message:'my message'});
+});
+```
+### Database Integration:- 
+http://expressjs.com/en/guide/database-integration.html
+* Cassandra
+* Couchbase
+* CouchDB
+* LevelDB
+* MySQL
+* MongoDB
+* Neo4j
+* Oracle
+* PostgreSQL
+* Redis
+* SQL Server
+* SQLite
+* Elasticsearch
+
+### Authentication:-
+The authentication is out of scope for Express. It can be achieved separately
+
+### Structuring a express application:-
+Create a folder like “routes” to routes all the requests like /api/courses etc..’
+Create a file under routes like name courses.js or genera.js as per your requirement.
+Export the express and use Router like below in file..
+```
+const express = require('express');
+const router = express.Router();
+To use it in the main index.js..
+const courses = require('./routes/courses');
+app.use('/api/courses',courses);  // here '/api/courses' is the routes..
+```
+Same for middleware, create a middleware folder and have all middleware in one file.
+
