@@ -713,3 +713,183 @@ app.use('/api/courses',courses);  // here '/api/courses' is the routes..
 ```
 Same for middleware, create a middleware folder and have all middleware in one file.
 
+## Asynchronous JS:-
+Asynchronous doesn’t mean the concurrency or multithread. It just means non-blocking.
+```
+console.log('Before');
+
+// Asynchronous code
+setTimeout(() => {
+    console.log('Reading a user from a db');
+}, 2000);
+
+console.log('After');
+
+O/P:-
+Before
+After
+Reading a user from a db // got displayed on console after 2 sec
+```
+
+If you want to return a value from some Asynchronous operation then there are 3 methods for it.
+* Callbacks
+* Promises
+* Async/await
+
+### 1 Callbacks and its hell:-
+```
+// Synchronous
+console.log('Before');
+const user = getUser(1);
+const repos = getRepositories(user.githubUsername);
+const commits = getcommits(repo[0]);
+console.log('After');
+```
+
+```
+// Asynchronous
+console.log('Before');
+
+getUser(1, (user) => {
+    console.log('User: ', user);
+
+    // get the repositories
+    getRepositories(user.githubUsername, (repos) => {
+        console.log('Repos: ', repos);
+    })
+});
+
+function getUser(id, callback) {
+    setTimeout(() => {
+        console.log('Reading a user from a db');
+        callback({ id: id, githubUsername: 'firozanwar' })
+
+	getCommits(params);
+    }, 2000);
+}
+
+function getRepositories(username, callback) {
+
+    setTimeout(() => {
+        console.log('Calling github api');
+        callback(['repo1', 'rrpo2', 'repo3']);
+    }, 2000);
+
+}
+console.log('After');
+```
+
+Conclusion: -Callback asynchronous is hell due to nesting.
+Solution for nesting callbacks:-
+We can create a name function and call it instead for callbacks. But this is a good solution and just a work sound.
+
+
+### 2 Promises
+It means it holds the asynchronous operation. Promises means it will give you some result completed or error/failed.
+
+```
+const  p = new Promise((resolve, reject) => {
+
+    // Async task here
+    setTimeout(() => {
+        //resolve(1);  // Success of fullfilled
+        reject(new Error('message'));   // pending -> failed
+    }, 2000);
+    
+    
+});
+
+p.then(result => console.log('Result',result))
+.catch(err => console.log('Error: ',err.message));
+```
+
+Code Snippets:-
+```
+// Asynchronous code
+// const p  = getUser(1);
+// p.then(user => console.log(user));
+
+//or
+getUser(1)
+.then(user => getRepositories(user.githubUsername))
+.then(repos => getCommits(repos[0]))
+.then(commits => console.log('Commits: ',commits))
+.catch(err => console.log('Error: ',err.message));  // thrown if anything goes wrong
+
+function getUser(id) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            console.log('Reading a user from a db');
+            resolve({ id: id, githubUsername: 'firozanwar' });
+        }, 2000);
+    });
+}
+
+function getRepositories(username) {
+
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            console.log('Calling github api');
+            resolve(['repo1', 'rrpo2', 'repo3']);
+        }, 2000);
+    });
+}
+
+function getCommits(repo){
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            console.log('Calling github api for commits');
+            resolve(['commit1', 'commit2', 'commit']);
+        }, 2000);
+    });
+}
+```
+
+Note:- If you need to resolve Promises at runtime like in unit tests or something we can do this by following..
+```
+const  p = Promise.resolve({id: 1});
+p.then(result => console.log(result));
+
+const  p1 = Promise.reject(new Error('rejected reason'));
+p.catch(error => console.log(error));
+```
+
+#### Parallel Promises:-
+Case 1: If you want multiple promises to run and on end display some result then use as below..
+Create a promise p1 with resolve(1)
+Create a promise p2 with resolve(2)
+
+And do 
+```
+Promise.all([p1,p2])
+	.then(result => console.log(result))
+	.catch(err => console.log(err));
+O/P:- [1,2]
+```
+Case 2:  If you want multiple promises to run and don't want to wait for entire all to finish then use 
+```
+Promise.race(p1,p2])
+.then(result => console.log(result))
+	.catch(err => console.log(err));
+O/P:-1   // Value of 1st fulfil promise
+```
+
+### 3 AsyncAwait
+AsyncAwait uses internally promises only. AsyncAwait is just a type s syntactical representation. It looks synchronous but works as asynchronous. Using a asyncawait you need to wrap your code in try catch block to catch error.
+// Async and await with approach.
+```
+async function displayCommits(){
+    try{
+        const user = await getUser(1);
+        const repos = await getRepositories(user.githubUsername);
+        const commits = await getCommits(repos[0]);
+        console.log(commits);
+    }catch(err){
+        console.log('error occured');
+    }
+   
+}
+
+displayCommits();
+```
+
