@@ -81,11 +81,14 @@ console.log(__filename);
 console.log(__dirname);
 ```
 
-* EventEmitter is one of the core classes in Node that allows us to raise (emit) and
-handle events. Several built-in classes in Node derive from EventEmitter. We will see in detail below.
- To create a class with the ability to raise events, we should extend EventEmitter:
-```class Logger extends EventEmitter {} ```
+* `EventEmitter` is one of the core classes in Node that allows us to raise (emit) and
+handle events. Several built-in classes in Node derive from EventEmitter. 
 
+ To create a class with the ability to raise events, we should extend EventEmitter:
+```
+class Logger extends EventEmitter {} 
+```
+We will see in detail below.
 ## Modules In NodeJS:- 
 Node has a few built-in modules that enable us to work with the file system, path objects, network, operating system, etc.
 
@@ -136,8 +139,15 @@ console.log('Listener is listening',args);
 //emitter.emit('MessageLogged'); // Emit without data
 emitter.emit('MessageLogged',{id : 1,url:'http'});
 ```
-
+Note:- We raising a event we must need to listner it else it will throw error. Like in above code Register listener can't be written after Raised an event.
 #### Arrow function
+An arrow function is a type of syntex writting for more code elegent. For example..
+```
+emitter.on('MessageLogged',function(args){
+	console.log('Listener is listening',args);
+});
+```
+The above code can be written as below..
 ```
 // Arrow function in ECMA 6
 emitter.on('MessageLogged',(args) => {
@@ -145,7 +155,8 @@ emitter.on('MessageLogged',(args) => {
 });
 ```
 
-* You can create a class in a module and export it and get it in another module to send and receive events.
+#### Communication between modules/Module dependencies:-
+You can create a class in a module and export it and get it in another module to send and receive events.
 
 From Module
 ```
@@ -167,7 +178,7 @@ To Module
 const Logger = require('./logger');
 const loggerObj = new Logger();
 loggerObj.on('MessageLogged', (args) => {
-console.log('Listener is listeningin app which is sent from logger module',args);
+	console.log('Listener is listeningin app which is sent from logger module',args);
 });
 
 loggerObj.log("Message from app");
@@ -196,6 +207,7 @@ const server  = http.createServer((req, res) => {
 server.listen(3000);
 console.log('Listening on port 3000..')
 ```
+To test open the chrome browser and hit `http://localhost:3000/` to see the output.
 ## Node Package Manager (npm)
 
 * Every Node application has a `package.json` file that includes metadata about the
