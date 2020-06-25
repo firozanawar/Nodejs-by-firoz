@@ -892,4 +892,353 @@ async function displayCommits(){
 
 displayCommits();
 ```
+## MongoDB:-
+https://www.mongodb.com/
+Mongodb can be installed using brew on mac using below command
+```
+brew install mongodb
+```
+But it will throw an error because it has been removed from homebrew. Check here
+https://stackoverflow.com/questions/57856809/installing-mongodb-with-homebrew
+* It stores the data in the data/db directory in the system.
+* Install the mongodb client app from and do connect https://www.mongodb.com/try/download/compass
+* Like in relational database we have Tables and rows, here in MongoDB we have Collections and documents.
+* Mongoose defined schema for data.
 
+### Creating a documents in mongoDB using mongoose
+```
+const mangoose = require('mongoose');
+```
+```
+mangoose.connect('mongodb://localhost/playground')
+.then( () => console.log('Connected to MongoDB'))
+.catch(err => console.error('Could not connect to MongoDb..',err));
+
+const courseSchema = new mangoose.Schema({
+    name : String,
+    author : String,
+    tags : [String],
+    data: {type: Date, default: Date.now},
+    isPublished : Boolean
+});
+
+// Compile the above schema into a model class
+const Course = mangoose.model('Course',courseSchema);
+
+async function createCourse(){
+// Create a object of model and initialize with document to map it.
+const course = new Course({
+    name: "Node.js course",
+    author: "Firoz",
+    tags: ['Angular','frontend'],
+    isPublished: true
+});
+
+// Save th data into MongoDB.
+const result  = await course.save();
+console.log(result);
+}
+
+createCourse();
+```
+
+* Open the MongoDB compass and refresh it. Data will be as below..
+```
+_id:5ef1d061ab04d204397f157e
+tags:Array
+data:2020-06-23T09:50:25.676+00:00
+name:"Node.js course"
+author:"Firoz"
+isPublished:true
+__v:0
+```
+ 
+### Query Database:- 
+```
+async function getCourses(){
+ 
+    // All the document
+    const courses = await Course.find();
+    console.log(courses);
+ 
+    // Specifc data
+    const coursesSpecifc = await Course.find({author: 'Firoz', isPublished: true});
+    console.log(coursesSpecifc);
+ 
+    const coursesFilter = await Course
+    .find({author: 'Firoz', isPublished: true})  // Filter the documents
+    .limit(10)   // No. of documents
+    .sort({name: -1})   // 1 for asending, -1 for descending 
+    .select({name: 1,tags:1});   // only show slected propertiy only.
+    console.log(coursesFilter);
+}
+```
+ 
+### Filtering documents / Comparison query operator in mongoDB:- 
+* eq  (equal)
+* ne (not equla)
+* gt (greater tha)
+* gte (greater than or equal to)
+* lt (less than)
+* in ()
+* nin (not in)
+ 
+Example 1: price greater than 10
+```
+.find({price: {$gt: 10} })  // Filter the documents
+```
+ 
+Example 2: Greater than 10 and less than or equal to 20
+```
+.find({price: {$gt: 10, $lte:20} })
+```
+ 
+Example 2: Price where it is 10, 15 and 20.
+```
+.find({price: {$in: [10,15,20]}})
+```
+ 
+### Logical query operator:-
+* or
+* and
+ ```
+.or([{author: 'Firoz'}, {isPublished: true}])
+.and[{author: 'Firoz'}, {isPublished: true}]
+  ```
+ 
+### Regular Expression:-
+```
+.find({author: /pattern/})
+```
+ 
+Example: Author start with Firoz
+```
+.find({author: /^Firoz/})
+ 
+    // End with Anwar
+    .find({author: /Anwar$/})
+ ```
+ 
+Note:- The above query is case sensitive. If you want to make query insensitive then append /I at last
+```
+.find({author: /Anwar$/i})
+```
+ 
+Example: If you want to search for a string-like contains method then you can use it like this..
+// Contain Firoz  (it could be in starting, middle to end anywhere)
+```
+find({author: /.*Firoz.*/})
+```
+ 
+### Counting:-
+```
+.find({author: 'Firoz'}, {isPublished: true})
+ .count();
+  console.log(coursesFilter);
+ 
+O/P: -1  (one record found)
+ ```
+ 
+### Paging:-
+```
+const pageNumber = 2;
+const pageSize = 10;
+ // api/course?pageNumber=2&pageSize=10
+ 
+.find({author: 'Firoz', isPublished: true})  
+.skip((pageNumber -1) * pageSize)
+```
+ 
+#### Exercise #1
+```
+const mongoose = require('mongoose');
+ 
+mongoose.connect('mongodb://localhost/mongo-exercises')
+    .then(() => console.log('Connected to MongoDB'))
+    .catch(err => console.error('Could not connect to MongoDb..', err));
+ 
+// Create a schema
+const courseSchema = new mongoose.Schema({
+    name: String,
+    author: String,
+    tags: [String],
+    date: Date,
+    isPublished: Boolean,
+    price: Number
+});
+ 
+// Create a model from schema
+// Compile the above schema into a model class
+const Course = mongoose.model('Course', courseSchema);
+ 
+async function getCourses() {
+ 
+    // const courses = await Course.find();
+    // console.log(courses);
+ 
+    return await Course
+        .find({ isPublished: true, tags: 'backend' })
+        .sort({ name: 1 })
+        .select({ name: 1, author: 1 });
+ 
+        return courses;
+}
+ 
+async function run() {
+    const coursesarray = await getCourses();
+    console.log(coursesarray);
+}
+ 
+run();
+ ```
+ 
+#### Exercise #2
+```
+return await Course
+        .find({ isPublished: true, tags: {$in: ['frontend','backend']} })
+        .sort( '-price')    // -1 for desending order
+        .select('name author price');
+ 
+// or
+.find({ isPublished: true})
+        .or([{tags: 'frontend'}, {tags: 'backend'}])
+        .sort( '-price')    // -1 for desending order
+        .select('name author price');
+```
+ 
+#### Exercise #3
+```
+return await Course
+        .find({ isPublished: true})
+        .or([
+            {price: {$gte: 15}}, 
+        {name: /.*by*./i}])
+        .sort( '-price')    // -1 for desending order
+        .select('name author price');
+ ```
+ 
+### Updating Documents - Query First
+There is 2 approach:- 
+#### Approach #1:-
+// Query first
+        // findById
+        // Modify its properties
+        // save
+ 
+// Apprach 1.a
+```
+        course.isPublished = true;
+        course.author = 'Author Author';
+    
+        // or Apprach 1. b
+        // course.set({
+        //     isPublished: true,
+        //     author: 'Author Author Author'
+        // });
+    
+        const result  = await course.save();
+        console.log(result);
+ ```
+#### Approach #2:-
+```
+// Update first
+        // Update directly
+        // Optionally: get the updated document
+ 
+const result  = await Course.update({_id: id}, {
+            $set:{
+                author: 'Mosh',
+                isPublished: false
+            }
+        });
+ ```
+There is another method findByIdAndUpdate etc etc...
+ 
+Note:- If you want to get the updated data back then pass last object as a {new: true}
+ 
+### Remove document:-
+```
+const result = await Course.deleteOne({ _id: id });
+const result = await Course.deleteMany({ _id: id });
+const course = await Course.findByIdAndRemove(id);
+ 
+async function removeDoc(id){
+        const result = await Course.deleteOne({_id: id});
+        console.log(result);
+        //Course.deleteMany({isPublished: false});
+    }
+``` 
+ 
+### Mongoose Data Validattor:-
+Data validation is required when we need a specific type of data like name should be String. Example if you define a name of type string and don’t pass that parameter it will show you the error.
+For data validation define like this
+name : {type: String, required: true},
+Data validation of any parameter could be 3 types. 1. Pending 2. Fulfilled 3. Rejected.
+ 
+Solution:-
+```
+try {
+// await course.validate();
+    const result  = await course.save();
+console.log(result);
+} catch (error) {
+    console.log(error.message);
+}
+ 
+O/P:-
+course validation failed: name: Path `name` is required.
+```
+ 
+### Built-In validator in mongoose:-
+→ required(): Let is suppose when published is true then only you want the price.
+ ```
+price: {
+        type: Number,
+        required: function () { return this.isPublished; }
+    }
+ ```
+—> minlength, maxlength and enum validator for String
+```
+name: { type: String, 
+        required: true, 
+        minlength: 5, 
+        maxlength: 255,
+         }
+ 
+category: {
+             type: String,
+             required: true,
+             enum: ['web','mobile']
+         }
+```
+```
+—> min: max: for Number
+ ```
+### Custom Validator:-
+If you want to implement your own logic, At Least should have at least one tag like below..
+```
+tags: {
+        type: Array,
+        validate: {
+            validator: function(v){
+                Return v &&  v.length
+            },
+            message: 'A course should have at least one tag'
+        }
+    }
+ ```
+### Async Validator:-
+```
+tags: {
+        type: Array,
+        validate: {
+            isAsync: true,
+            validator: function (v,callback) {
+                setTimeout(() => {
+                    return v && v.length
+                }, 1000);
+            },
+            message: 'A course should have atleast one tag'
+        }
+    }
+```
